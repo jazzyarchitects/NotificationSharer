@@ -24,14 +24,26 @@ import io.socket.emitter.Emitter;
  * Created by jibin on 25/2/17.
  */
 
-public class NotificationReader extends NotificationListenerService {
+public class NotificationReader2 extends NotificationListenerService {
     Context context;
     PackageManager packageManager;
     SharedPreferences sharedPreferences;
     
-    private final String TAG = "NotificationReader";
+    private final String TAG = "NotificationReader2";
 
     Socket socket;
+
+    @Override
+    public void onListenerConnected() {
+        super.onListenerConnected();
+        Log.e(TAG, "Notification Listener connected");
+    }
+
+    @Override
+    public void onListenerDisconnected() {
+        super.onListenerDisconnected();
+        Log.e(TAG, "Notification listener disconnected");
+    }
 
     @Override
     public void onCreate() {
@@ -45,6 +57,7 @@ public class NotificationReader extends NotificationListenerService {
 
     @Override
     public IBinder onBind(Intent intent) {
+        Log.e(TAG, "onBind");
         return super.onBind(intent);
     }
 
@@ -52,7 +65,8 @@ public class NotificationReader extends NotificationListenerService {
     public void onNotificationPosted(StatusBarNotification sbn) {
         super.onNotificationPosted(sbn);
 
-        if(!sharedPreferences.contains(Constants.Preferences.Application.CHROME_UNIQUE_ID)){
+        if(!sharedPreferences.contains(Constants.Preferences.Application.CHROME_UNIQUE_ID) || sbn.isOngoing()){
+            Log.e(TAG, "Chrome Id not available or notification is ongoing");
             return;
         }
 
@@ -91,6 +105,7 @@ public class NotificationReader extends NotificationListenerService {
             jsonObject.put("AppName", appName);
             jsonObject.put("ticker", ticker);
             jsonObject.put("title", title);
+            jsonObject.put("id", sbn.getId());
             jsonObject.put("text", text);
             jsonObject.put("chromeId", sharedPreferences.getString(Constants.Preferences.Application.CHROME_UNIQUE_ID, ""));
         } catch (JSONException e) {
@@ -102,8 +117,15 @@ public class NotificationReader extends NotificationListenerService {
         socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
             @Override
             public void call(Object... args) {
+                Log.e(TAG, "Socket connected");
                 socket.emit(Constants.Socket.EVENT_NOTIFICATION, jsonObject);
                 socket.disconnect();
+            }
+        });
+        socket.on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                Log.e(TAG, "Socket disconnected: "+args[0].toString());
             }
         });
 
