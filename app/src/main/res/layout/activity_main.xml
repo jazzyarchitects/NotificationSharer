@@ -5,45 +5,85 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorPrimary"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="in.jibinmathews.notificationsharer.MainActivity">
 
-    <TextView
+    <android.support.v7.widget.Toolbar
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:id="@+id/toolbar"/>
+
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/permissionText"
-        android:text="@string/permissionText"
-        android:textColor="#ffffff"
-        android:textAlignment="center"
-        android:textSize="14sp"/>
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/openSettingsButton"
-        android:layout_below="@+id/permissionText"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="10dp"
-        android:background="@drawable/ripple"
-        android:textColor="#fff"
-        android:elevation="5dp"
-        android:text="@string/openSettingsButton"/>
+        android:layout_centerVertical="true">
 
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:text="@string/allSet"
-        android:textColor="#ffffff"
-        android:textSize="16sp"
-        tools:visibility="visible"
-        android:visibility="gone"
-        android:textAlignment="center"
-        android:id="@+id/allSet"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/permissionText"
+            android:text="@string/permissionText"
+            android:textColor="#ffffff"
+            android:textAlignment="center"
+            android:textSize="14sp"/>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/openSettingsButton"
+            android:layout_below="@+id/permissionText"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/ripple"
+            android:textColor="#fff"
+            android:elevation="5dp"
+            android:text="@string/openSettingsButton"/>
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/allSet"
+            android:textColor="#ffffff"
+            android:textSize="16sp"
+            tools:visibility="visible"
+            android:visibility="gone"
+            android:textAlignment="center"
+            android:id="@+id/allSet"/>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/pairingButton"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@+id/allSet"
+            tools:visibility="visible"
+            android:visibility="gone"
+            android:layout_marginTop="25dp"
+            android:background="@drawable/ripple"
+            android:text="@string/pair_chrome_extension"
+            android:textColor="#fff"/>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/clearPairingButton"
+            android:background="#c42323"
+            android:textColor="#fff"
+            android:padding="10dp"
+            tools:visibility="visible"
+            android:visibility="gone"
+            android:layout_below="@+id/allSet"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="95dp"
+            android:text="@string/clear_pairing_status"/>
+
+
+    </RelativeLayout>
+
+
 
     <Button
         android:layout_width="wrap_content"

@@ -17,4 +17,6 @@
 
     <string name="action_share">Share</string>
     <string name="action_reply">Reply</string>
+    <string name="pair_chrome_extension">Pair chrome extension</string>
+    <string name="clear_pairing_status">Clear Pairing Status</string>
 </resources>

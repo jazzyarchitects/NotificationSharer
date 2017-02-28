@@ -44,7 +44,7 @@ public class TestNotification {
      *
      * @see #cancel(Context)
      */
-    public static void notify(final Context context,
+    public static void notify(final Context context, final String titleString,
                               final String exampleString, final int number) {
         final Resources res = context.getResources();
 
@@ -54,10 +54,19 @@ public class TestNotification {
 
 
         final String ticker = exampleString;
-        final String title = res.getString(
-                R.string.test_notification_title_template, exampleString)+ Calendar.getInstance().toString();
-        final String text = res.getString(
-                R.string.test_notification_placeholder_text_template, exampleString);
+
+        String title = res.getString(
+                R.string.test_notification_title_template, exampleString);
+        if (!titleString.isEmpty()) {
+            title = titleString;
+        }
+
+        String text;
+        if (exampleString.isEmpty()) {
+            text = res.getString(R.string.test_notification_placeholder_text_template, exampleString);
+        } else {
+            text = exampleString;
+        }
 
         final NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
 
@@ -152,7 +161,7 @@ public class TestNotification {
 
     /**
      * Cancels any notifications of this type previously shown using
-     * {@link #notify(Context, String, int)}.
+     * {@link #notify(Context, String, String, int)}.
      */
     @TargetApi(Build.VERSION_CODES.ECLAIR)
     public static void cancel(final Context context) {

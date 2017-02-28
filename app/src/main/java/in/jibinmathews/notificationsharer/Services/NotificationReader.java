@@ -1,7 +1,8 @@
-package in.jibinmathews.notificationsharer.BroadcastReceivers;
+package in.jibinmathews.notificationsharer.Services;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -14,6 +15,7 @@ import org.json.JSONObject;
 
 import java.net.URISyntaxException;
 
+import in.jibinmathews.notificationsharer.Constants;
 import io.socket.client.IO;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
@@ -25,59 +27,44 @@ import io.socket.emitter.Emitter;
 public class NotificationReader extends NotificationListenerService {
     Context context;
     PackageManager packageManager;
+    SharedPreferences sharedPreferences;
+    
+    private final String TAG = "NotificationReader";
 
     Socket socket;
-    boolean connected = false;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        initalize();
-    }
-
-    private void initalize() {
-        Log.e("NotificationReader", "onCreate");
+        Log.e(TAG, "onCreate");
 
         context = getApplicationContext();
-
         packageManager = context.getPackageManager();
+        sharedPreferences = getSharedPreferences(Constants.Preferences.Application.PREF, Context.MODE_PRIVATE);
+    }
 
-        try {
-            socket = IO.socket("http://jibinmathews.in");
-            socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
-                @Override
-                public void call(Object... args) {
-                    Log.e("NotificationReader", "Socket connected");
-                    connected = true;
-                    // First connection
-                }
-            });
-            socket.on(Socket.EVENT_CONNECT_ERROR, new Emitter.Listener() {
-                @Override
-                public void call(Object... args) {
-                    Log.e("NotificationReader", "Error Connecting to socket: " + args[0].toString());
-                }
-            });
-            socket.on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
-                @Override
-                public void call(Object... args) {
-                    Log.e("NotificationReader", "Disconnected: "+args[0].toString());
-                    connected = false;
-                }
-            });
-            socket.connect();
-
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
+    @Override
+    public IBinder onBind(Intent intent) {
+        return super.onBind(intent);
     }
 
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
         super.onNotificationPosted(sbn);
-        if (!connected) {
-            initalize();
+
+        if(!sharedPreferences.contains(Constants.Preferences.Application.CHROME_UNIQUE_ID)){
+            return;
         }
+
+        Log.e(TAG, "Notification received");
+
+
+        try {
+            socket = IO.socket(Constants.SOCKET_URL);
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+
         String ticker = "";
 
         String appName = getAppNameFromPackage(sbn.getPackageName());
@@ -105,12 +92,22 @@ public class NotificationReader extends NotificationListenerService {
             jsonObject.put("ticker", ticker);
             jsonObject.put("title", title);
             jsonObject.put("text", text);
+            jsonObject.put("chromeId", sharedPreferences.getString(Constants.Preferences.Application.CHROME_UNIQUE_ID, ""));
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-        Log.e("NotificationReader", "Sending event" + jsonObject.toString());
-        socket.emit("notification", jsonObject);
+        Log.e(TAG, "Sending event" + jsonObject.toString());
+
+        socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                socket.emit(Constants.Socket.EVENT_NOTIFICATION, jsonObject);
+                socket.disconnect();
+            }
+        });
+
+        socket.connect();
 
     }
 
@@ -125,7 +122,7 @@ public class NotificationReader extends NotificationListenerService {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.e("NotificationReader", "OnDestroy");
+        Log.e(TAG, "OnDestroy");
         socket.disconnect();
     }
 }
